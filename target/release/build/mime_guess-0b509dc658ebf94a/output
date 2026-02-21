@@ -1,0 +1,1 @@
+cargo:rustc-env=MIME_TYPES_GENERATED_PATH=/Users/vidip/envx/target/release/build/mime_guess-0b509dc658ebf94a/out/mime_types_generated.rs
