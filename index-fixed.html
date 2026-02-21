@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>ENVX Desktop</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        width: 600px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      h1 span {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+      .input-group {
+        display: flex;
+        gap: 10px;
+        margin: 30px 0;
+      }
+      input {
+        flex: 1;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      button {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 0 30px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .terminal {
+        background: #1e1e1e;
+        border-radius: 10px;
+        padding: 20px;
+        color: #00ff00;
+        font-family: "Courier New", monospace;
+        height: 200px;
+        overflow-y: auto;
+        font-size: 14px;
+        margin-top: 20px;
+      }
+      .terminal .prompt {
+        color: #00ff00;
+      }
+      .terminal .output {
+        color: #ffffff;
+        margin-left: 20px;
+      }
+      .terminal .success {
+        color: #00ff00;
+        font-weight: bold;
+      }
+      .terminal .error {
+        color: #ff4444;
+      }
+      .progress {
+        height: 4px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        margin-top: 20px;
+        overflow: hidden;
+        display: none;
+      }
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 0%;
+        transition: width 0.3s;
+      }
+      .status {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+        font-weight: 500;
+      }
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .quick-links {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+      .quick-link {
+        background: #f0f0f0;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .quick-link:hover {
+        background: #e0e0e0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>
+        🚀 ENVX Desktop
+        <span>v1.0</span>
+      </h1>
+      <p>Paste any GitHub URL and watch the magic happen! ✨</p>
+
+      <div class="input-group">
+        <input
+          type="text"
+          id="repoUrl"
+          placeholder="https://github.com/username/repo"
+          value="https://github.com/aarifzz/EXPENSE-TRACKER"
+        />
+        <button id="setupBtn" onclick="setupProject()">⚡ SETUP</button>
+      </div>
+
+      <div class="quick-links">
+        <div
+          class="quick-link"
+          onclick="quickSetup('https://github.com/aarifzz/parkit')"
+        >
+          🎯 parkit (JS/Python)
+        </div>
+        <div
+          class="quick-link"
+          onclick="quickSetup('https://github.com/Suwadith/Blog-Application-Python-Kivy-MySQL')"
+        >
+          🐍 Kivy Blog
+        </div>
+        <div
+          class="quick-link"
+          onclick="quickSetup('https://github.com/jason-michael/express-mysql-todo')"
+        >
+          📝 Todo App
+        </div>
+        <div
+          class="quick-link"
+          onclick="quickSetup('https://github.com/Yash-srivastav16/DevBlogify')"
+        >
+          📱 DevBlogify
+        </div>
+      </div>
+
+      <div class="terminal" id="terminal">
+        <div>>_ ENVX Terminal Ready</div>
+        <div>Paste a GitHub URL and click SETUP</div>
+      </div>
+
+      <div class="progress" id="progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="status" id="status"></div>
+    </div>
+
+    <script>
+      // --- Tauri invoke helper - CORRECTED PATTERN ---
+      const { invoke } = window.__TAURI__.tauri;
+
+      function log(message, type = "output") {
+        const terminal = document.getElementById("terminal");
+        const prompt =
+          type === "error" ? "❌" : type === "success" ? "✅" : ">";
+        terminal.innerHTML += `<div><span class="prompt">${prompt}</span> <span class="${type}">${message}</span></div>`;
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      function setProgress(percent) {
+        document.getElementById("progress").style.display = "block";
+        document.getElementById("progressBar").style.width = percent + "%";
+      }
+
+      function showStatus(message, type) {
+        const status = document.getElementById("status");
+        status.className = "status " + type;
+        status.textContent = message;
+      }
+
+      function quickSetup(url) {
+        document.getElementById("repoUrl").value = url;
+        setupProject();
+      }
+
+      async function setupProject() {
+        const url = document.getElementById("repoUrl").value;
+        const btn = document.getElementById("setupBtn");
+
+        if (!url.includes("github.com")) {
+          log("Invalid GitHub URL!", "error");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "⏳ SETTING UP...";
+        document.getElementById("terminal").innerHTML =
+          "<div>>_ ENVX Terminal Ready</div>";
+        log(`🚀 Starting setup for: ${url}`, "output");
+        setProgress(10);
+
+        try {
+          // --- CORRECTED: Use invoke directly ---
+          log("📦 Cloning repository...", "output");
+          setProgress(20);
+          const repoName = url.split("/").pop();
+          const cloneResult = await invoke("clone_repo", { url });
+          log(`✅ Cloned: ${repoName}`, "success");
+          setProgress(40);
+
+          log(`📂 Changing to: ${repoName}`, "output");
+          setProgress(50);
+
+          log("🔧 Running ENVX setup...", "output");
+          setProgress(60);
+          const envxResult = await invoke("run_envx", {
+            projectName: repoName,
+          });
+          log("✅ ENVX setup complete!", "success");
+          setProgress(90);
+
+          log("🚀 Starting the application...", "output");
+          setProgress(95);
+          const runResult = await invoke("run_app", { projectName: repoName });
+          log(`✅ Application running!`, "success");
+
+          if (runResult.commands) {
+            log(`\n📋 Available commands:`, "output");
+            runResult.commands.forEach((cmd) => log(`   ${cmd}`, "output"));
+          }
+
+          setProgress(100);
+          showStatus("✨ SUCCESS! Application is running!", "success");
+          log("\n🎉 ENVX Desktop - Setup Complete!", "success");
+        } catch (error) {
+          log(`❌ Error: ${error}`, "error");
+          showStatus("❌ Setup failed!", "error");
+          console.error("Setup error:", error);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "⚡ SETUP";
+          setTimeout(
+            () => (document.getElementById("progress").style.display = "none"),
+            2000
+          );
+        }
+      }
+
+      // Check Tauri availability on load
+      window.addEventListener("DOMContentLoaded", () => {
+        if (window.__TAURI__?.tauri?.invoke) {
+          console.log("✅ Tauri is ready");
+          log("✅ Connected to ENVX backend", "success");
+        } else {
+          console.error("❌ Tauri not available");
+          log("❌ ERROR: Tauri backend not connected", "error");
+        }
+      });
+    </script>
+  </body>
+</html>

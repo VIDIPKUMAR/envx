@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test App</title>
+</head>
+<body>
+    <h1>ENVX Test</h1>
+    <button onclick="test()">Test Connection</button>
+    <p id="result"></p>
+
+    <script>
+        async function test() {
+            try {
+                // Try both possible APIs
+                let result;
+                if (window.__TAURI__?.core?.invoke) {
+                    result = await window.__TAURI__.core.invoke('test_command');
+                } else if (window.__TAURI__?.tauri?.invoke) {
+                    result = await window.__TAURI__.tauri.invoke('test_command');
+                } else {
+                    throw new Error('No Tauri API found');
+                }
+                document.getElementById('result').innerText = result;
+            } catch (e) {
+                document.getElementById('result').innerText = 'Error: ' + e.message;
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>

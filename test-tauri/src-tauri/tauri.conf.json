@@ -1,0 +1,24 @@
+{
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../"
+  },
+  "productName": "test-app",
+  "version": "0.1.0",
+  "identifier": "com.test.app",
+  "app": {
+    "windows": [
+      {
+        "title": "Test App",
+        "width": 800,
+        "height": 600
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "icon": []
+  }
+}

@@ -1,0 +1,20 @@
+[package]
+name = "envx"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full", "process"] }
+clap = { version = "4.0", features = ["derive"] }
+colored = "2.0"
+indicatif = "0.17"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+dirs = "5.0"
+regex = "1"
+lazy_static = "1.4"
+md5 = "0.7"
+ignore = "0.4"
+walkdir = "2"
